@@ -123,7 +123,7 @@ def draw_map(file_name, json_path, save_path):
         json_data = json.load(json_file)
 
     # Draw the contour
-    verts = (np.array(json_data['verts']) * meter2pixel).astype(np.int)
+    verts = (np.array(json_data['verts']) * meter2pixel).astype(np.int64)
     x_max, x_min, y_max, y_min = np.max(verts[:, 0]), np.min(verts[:, 0]), np.max(verts[:, 1]), np.min(verts[:, 1])
     cnt_map = np.zeros((y_max - y_min + border_pad * 2,
                         x_max - x_min + border_pad * 2))

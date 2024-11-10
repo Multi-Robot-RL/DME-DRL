@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import sim_utils
 from navigate import AStar, AStarSimple
 import os
+import copy
 
 
 class Robot():
@@ -72,8 +73,8 @@ class Robot():
 
     def _build_map_with_rangeCoordMat(self, y_range_coord_mat, x_range_coord_mat):
         """build map after moving"""
-        y_range_coord_mat = (np.round(y_range_coord_mat)).astype(np.int)
-        x_range_coord_mat = (np.round(x_range_coord_mat)).astype(np.int)
+        y_range_coord_mat = (np.round(y_range_coord_mat)).astype(np.int64)
+        x_range_coord_mat = (np.round(x_range_coord_mat)).astype(np.int64)
         in_bound_ind = sim_utils.within_bound(np.array([y_range_coord_mat, x_range_coord_mat]), self.maze.shape)
 
         """delete points outside boundaries"""
@@ -272,7 +273,7 @@ class Robot():
                         self.frontiers[7].append((y, x))
 
         if len(self.frontiers) > 0:
-            return np.copy(self.frontiers)
+            return copy.deepcopy(self.frontiers)
         else:
             raise Exception('Exception: None Contour!')
 
