@@ -6,6 +6,7 @@ from pathlib import Path
 
 # Load the HouseExpo dataset
 
+
 def process_image(image):
     # Convert to numpy array
     image_array = np.array(image)
@@ -22,9 +23,9 @@ def process_image(image):
     free_space_percentage = free_space_pixels / total_pixels
 
     return {
-        'binary_mask': binary_mask,
-        'obstacle_percentage': obstacle_percentage,
-        'free_space_percentage': free_space_percentage
+        "binary_mask": binary_mask,
+        "obstacle_percentage": obstacle_percentage,
+        "free_space_percentage": free_space_percentage,
     }
 
 
@@ -39,21 +40,22 @@ def load_processed_dataset(start: int, end: int, split: str = "train"):
 
     # Load the original dataset
     original_dataset_path = base_path / "house_expo_dataset"
-    if (original_dataset_path.exists()):
+    if original_dataset_path.exists():
         dataset = load_from_disk(str(original_dataset_path))
     else:
-        dataset = load_dataset('cwyark/HouseExpo', split=split).select(range(start, end))
+        dataset = load_dataset("cwyark/HouseExpo", split=split).select(
+            range(start, end)
+        )
         dataset.save_to_disk(str(original_dataset_path))
 
     # Apply the processing function to the dataset
     mapped_dataset_path = base_path / "processed_house_expo_dataset"
-    if (mapped_dataset_path.exists()):
+    if mapped_dataset_path.exists():
         dataset = load_from_disk(str(mapped_dataset_path))
     else:
-        dataset = dataset.map(lambda x: process_image(x['image']))
+        dataset = dataset.map(lambda x: process_image(x["image"]))
         dataset.save_to_disk(str(mapped_dataset_path))
 
 
 if __name__ == "__main__":
-    load_processed_dataset(0, 200)
-
+    load_processed_dataset(0, 10)
