@@ -31,9 +31,9 @@ def process_image(image):
 data_path = Path("data")
 
 
-def load_processed_dataset(split: str = "train"):
+def load_processed_dataset(start: int, end: int, split: str = "train"):
     # if data_path does not exist, mkdir
-    base_path = data_path / split
+    base_path = data_path / f"{split}_{start}_{end}"
     if not data_path.exists(follow_symlinks=False):
         makedirs(base_path)
 
@@ -42,7 +42,7 @@ def load_processed_dataset(split: str = "train"):
     if (original_dataset_path.exists()):
         dataset = load_from_disk(str(original_dataset_path))
     else:
-        dataset = load_dataset('cwyark/HouseExpo', split=split)
+        dataset = load_dataset('cwyark/HouseExpo', split=split).select(range(start, end))
         dataset.save_to_disk(str(original_dataset_path))
 
     # Apply the processing function to the dataset
@@ -55,5 +55,5 @@ def load_processed_dataset(split: str = "train"):
 
 
 if __name__ == "__main__":
-    load_processed_dataset()
+    load_processed_dataset(0, 200)
 
