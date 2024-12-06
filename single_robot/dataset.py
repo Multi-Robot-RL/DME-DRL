@@ -1,8 +1,6 @@
 from os import makedirs
 from datasets import load_dataset, load_from_disk
-from PIL import Image
 import numpy as np
-import io
 from pathlib import Path
 
 
