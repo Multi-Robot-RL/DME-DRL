@@ -97,6 +97,7 @@ for episode in range(MAX_EPISODES):
     directions = []
     frontier_maps = []
     robot_obstacle_maps = []
+    old_performance = 0
 
     for step in range(MAX_STEPS):
         print(f"At step {step}: Location {current_location}")
@@ -115,8 +116,8 @@ for episode in range(MAX_EPISODES):
 
         # Extract and apply exploration noise to actions
         action = actor_output[0].detach().numpy()
-        linear_velocity = action[0] + np.random.normal(0, EXPLORATION_STD)
-        angular_velocity = action[1] + np.random.normal(0, EXPLORATION_STD)
+        linear_velocity = action[0]
+        angular_velocity = action[1]
 
         # Simulate next step
         action = (linear_velocity, angular_velocity)
@@ -141,7 +142,7 @@ for episode in range(MAX_EPISODES):
         )
 
         # Evaluate model performance
-        performance = evaluate_model_performance(
+        new_performance = evaluate_model_performance(
             frontier_map, ground_truth_obstacle_map
         )
 
@@ -150,14 +151,16 @@ for episode in range(MAX_EPISODES):
             reward = COLLISION_PENALTY
         else:
             reward = (
-                EXPLORATION_REWARD * performance
+                EXPLORATION_REWARD * np.tanh(new_performance - old_performance)
             )  # Reward for valid movement and exploration
+        print(reward)
+        old_performance = new_performance
 
         total_reward += reward
 
         # Calculate TD target and loss
         next_feature_vector = generate_feature_vector(
-            robot_obstacle_map, frontier_map, next_location, 8, 0.5, 0.5
+            robot_obstacle_map, frontier_map, next_location,next_direction, 0.5, 0.5
         )
         next_feature_tensor = torch.tensor(
             next_feature_vector, dtype=torch.float32
@@ -185,7 +188,7 @@ for episode in range(MAX_EPISODES):
         current_location, current_direction = next_location, next_direction
 
     print(
-        f"Episode {episode + 1}/{MAX_EPISODES}, Total Reward: {total_reward:.2f}, Free Space Discovered: {performance:.2f}%"
+        f"Episode {episode + 1}/{MAX_EPISODES}, Total Reward: {total_reward:.2f}, Free Space Discovered: {old_performance:.2f}%"
     )
     if not (data_path / train_id).exists():
         makedirs(data_path / train_id)
