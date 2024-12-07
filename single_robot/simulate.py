@@ -1,6 +1,7 @@
 import torch
 from model import device
 
+
 def simulate_robot_step(
     location, direction, action, elapsed_time, map_size, binary_map, randomness_std=0.1
 ):
@@ -55,6 +56,7 @@ def simulate_robot_step(
     # No collision; update the robot's state
     return (next_x.item(), next_y.item()), next_direction.item(), False
 
+
 def update_maps(
     frontier_map,
     robot_obstacle_map,
@@ -98,7 +100,7 @@ def update_maps(
         direction - max_detection_angle / 2,
         direction + max_detection_angle / 2,
         steps=num_rays,
-        device=device
+        device=device,
     )
 
     # Raycasting steps

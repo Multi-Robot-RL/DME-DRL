@@ -1,6 +1,7 @@
 import torch
 from model import device  # Determine the device (e.g., "cuda" or "cpu")
 
+
 def evaluate_model_performance(frontier_map, ground_truth_obstacle_map):
     """
     Evaluate the performance of a model by calculating the percentage of free space discovered (PyTorch version).

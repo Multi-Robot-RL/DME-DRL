@@ -57,7 +57,9 @@ def generate_random_free_location(ground_truth_obstacle_map):
 
 # Environment setup
 def create_environment(houseexpo_dataset, room_id):
-    ground_truth_obstacle_map = torch.tensor(houseexpo_dataset[room_id]["binary_mask"], device=device)
+    ground_truth_obstacle_map = torch.tensor(
+        houseexpo_dataset[room_id]["binary_mask"], device=device
+    )
     print(f"Map size of Room {room_id}: {ground_truth_obstacle_map.shape}")
     map_size = ground_truth_obstacle_map.shape
     frontier_map = torch.zeros(map_size, device=device)
@@ -90,14 +92,18 @@ for episode in range(MAX_EPISODES):
         print(f"Step {step} at {current_location}")
 
         # Generate features and move to device
-        feature_tensor = generate_feature_vector(
-            robot_obstacle_map,
-            frontier_map,
-            current_location,
-            current_direction,
-            0.5,
-            0.5,
-        ).unsqueeze(0).to(device)
+        feature_tensor = (
+            generate_feature_vector(
+                robot_obstacle_map,
+                frontier_map,
+                current_location,
+                current_direction,
+                0.5,
+                0.5,
+            )
+            .unsqueeze(0)
+            .to(device)
+        )
         # Forward pass
         actor_output, critic_value = model(feature_tensor)
         action = actor_output[0].detach().cpu().numpy()
@@ -138,9 +144,18 @@ for episode in range(MAX_EPISODES):
         total_reward += reward
 
         # Prepare tensors for TD target and loss
-        next_feature_tensor = generate_feature_vector(
-            robot_obstacle_map, frontier_map, next_location, next_direction, 0.5, 0.5
-        ).unsqueeze(0).to(device)
+        next_feature_tensor = (
+            generate_feature_vector(
+                robot_obstacle_map,
+                frontier_map,
+                next_location,
+                next_direction,
+                0.5,
+                0.5,
+            )
+            .unsqueeze(0)
+            .to(device)
+        )
 
         _, next_critic_value = model(next_feature_tensor)
         td_target = reward + GAMMA * next_critic_value
