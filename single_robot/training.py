@@ -36,6 +36,7 @@ model = ActorCriticDQN(
 )
 optimizer = optim.Adam(model.parameters(), lr=LR)
 
+
 def generate_random_free_location(ground_truth_obstacle_map):
     """
     Generate a random location within the map that is not an obstacle.
@@ -84,7 +85,8 @@ def create_environment(houseexpo_dataset, room_id):
 
     return ground_truth_obstacle_map, frontier_map, robot_obstacle_map
 
-train_id = "TRAIN"+str(datetime.now()).replace(" ", ".")
+
+train_id = "TRAIN" + str(datetime.now()).replace(" ", ".")
 
 dataset = load_processed_dataset(0, TRAIN_DATASET_SIZE)
 # Training loop
@@ -191,8 +193,8 @@ for episode in range(MAX_EPISODES):
     print(
         f"Episode {episode + 1}/{MAX_EPISODES}, Total Reward: {total_reward:.2f}, Free Space Discovered: {performance:.2f}%"
     )
-    if not (data_path/train_id).exists():
-        makedirs(data_path/train_id)
+    if not (data_path / train_id).exists():
+        makedirs(data_path / train_id)
     animate_robot_progress(
         frontier_maps,
         robot_obstacle_maps,
@@ -201,7 +203,7 @@ for episode in range(MAX_EPISODES):
         directions,
         max_detection_dist=MAX_DETECTION_DIST,
         max_detection_angle=MAX_DETECTION_ANGLE,
-        save_path=data_path /train_id/ f"episode{episode}.gif"
+        save_path=data_path / train_id / f"episode{episode}.gif",
     )
 
 print("Training Complete.")
