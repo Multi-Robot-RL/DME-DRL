@@ -10,7 +10,7 @@ def generate_feature_vector(
     obstacle_threshold,
 ):
     """
-    Generate the feature vector from frontier and obstacle maps.
+    Generate the feature vector from frontier and obstacle maps using vectorized operations.
 
     Args:
         frontier_map (np.ndarray): 2D array representing explored areas.
@@ -21,7 +21,7 @@ def generate_feature_vector(
         obstacle_threshold (float): Threshold above which a cell is considered an obstacle.
 
     Returns:
-        np.ndarray: Flattened feature vector for the ROOM_SPLIT sections.
+        np.ndarray: Flattened feature vector for the room_split sections.
     """
     # Get map dimensions
     map_size_x, map_size_y = frontier_map.shape
@@ -32,6 +32,21 @@ def generate_feature_vector(
     # Angular increment for each section
     angle_increment = 2 * np.pi / room_split
 
+    # Create grid coordinates
+    x_coords, y_coords = np.meshgrid(np.arange(map_size_x), np.arange(map_size_y), indexing='ij')
+
+    # Calculate relative positions to the robot
+    dx = x_coords - robot_x
+    dy = y_coords - robot_y
+    distances = np.sqrt(dx**2 + dy**2)
+
+    # Calculate angles relative to the robot
+    angles = np.arctan2(dy, dx)
+    angles[angles < 0] += 2 * np.pi  # Normalize to [0, 2π)
+
+    # Mask for the robot's current position (avoid self-reference)
+    mask_robot_position = (dx == 0) & (dy == 0)
+
     # Initialize the feature vector
     feature_vector = []
 
@@ -40,52 +55,25 @@ def generate_feature_vector(
         start_angle = section * angle_increment
         end_angle = (section + 1) * angle_increment
 
-        # Initialize section-specific metrics
-        total_area = 0
-        unexplored_area = 0
-        nearest_obstacle_distance = np.inf
+        # Create a mask for the current angular section
+        angle_mask = (angles >= start_angle) & (angles < end_angle)
 
-        # Traverse the map to calculate metrics for the current section
-        for i in range(map_size_x):
-            for j in range(map_size_y):
-                # Calculate relative position to the robot
-                dx, dy = i - robot_x, j - robot_y
-                distance = np.sqrt(dx**2 + dy**2)
+        # Combine masks for section and exclude the robot's position
+        combined_mask = angle_mask & ~mask_robot_position
 
-                # Skip the robot's current position
-                if distance == 0:
-                    continue
+        # Metrics for the current section
+        total_area = np.sum(combined_mask)
+        unexplored_area = np.sum(combined_mask & (frontier_map < frontier_threshold))
+        obstacle_distances = distances[combined_mask & (obstacle_map > obstacle_threshold)]
 
-                # Calculate the angle relative to the robot
-                angle = np.arctan2(dy, dx)
-                if angle < 0:
-                    angle += 2 * np.pi  # Normalize to [0, 2π)
-
-                # Check if the cell falls within the current angular section
-                if start_angle <= angle < end_angle:
-                    total_area += 1
-
-                    # Check unexplored area
-                    if frontier_map[i, j] < frontier_threshold:
-                        unexplored_area += 1
-
-                    # Check obstacle distance
-                    if obstacle_map[i, j] > obstacle_threshold:
-                        nearest_obstacle_distance = min(
-                            nearest_obstacle_distance, distance
-                        )
-
-        # Handle case where no obstacle is found
-        if nearest_obstacle_distance == np.inf:
-            nearest_obstacle_distance = 0  # No obstacles in this section
+        # Nearest obstacle distance
+        nearest_obstacle_distance = obstacle_distances.min() if obstacle_distances.size > 0 else 0
 
         # Calculate the unexplored ratio
         unexplored_ratio = unexplored_area / total_area if total_area > 0 else 0
 
         # Append the features for this section
-        feature_vector.extend(
-            [total_area, nearest_obstacle_distance, unexplored_area, unexplored_ratio]
-        )
+        feature_vector.extend([total_area, nearest_obstacle_distance, unexplored_area, unexplored_ratio])
 
     # Convert feature vector to numpy array
     return np.array(feature_vector)

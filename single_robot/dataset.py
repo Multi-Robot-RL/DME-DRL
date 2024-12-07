@@ -55,6 +55,7 @@ def load_processed_dataset(start: int, end: int, split: str = "train"):
     else:
         dataset = dataset.map(lambda x: process_image(x["image"]))
         dataset.save_to_disk(str(mapped_dataset_path))
+    return dataset
 
 
 if __name__ == "__main__":
