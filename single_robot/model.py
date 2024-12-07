@@ -79,7 +79,9 @@ class ActorCriticDQN(nn.Module):
 
 
 # Parameters for the model
-input_dim = 4 * ROOM_SPLIT + 5  # 4 features per section, multiplied by ROOM_SPLIT and the robot location, room size and direction
+input_dim = (
+    4 * ROOM_SPLIT + 5
+)  # 4 features per section, multiplied by ROOM_SPLIT and the robot location, room size and direction
 # Create the Actor-Critic model
 model = ActorCriticDQN(
     input_dim=input_dim,
@@ -89,8 +91,14 @@ model = ActorCriticDQN(
     max_angular_velocity=MAX_ANGULAR_VELOCITY,
 )
 
+# Check for GPU and Move Model
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+model = model.to(device)
+
 # Print the model architecture
 print(model)
+
 
 def save_onnx(model, file_path):
     # Set the model to evaluation mode
@@ -102,7 +110,7 @@ def save_onnx(model, file_path):
 
     # Export the model to ONNX
     torch.onnx.export(
-        model,                      # Model to export
-        dummy_input,                # Dummy input to trace the model
-        file_path
-        )
+        model,  # Model to export
+        dummy_input,  # Dummy input to trace the model
+        file_path,
+    )
