@@ -33,7 +33,9 @@ def generate_feature_vector(
     angle_increment = 2 * np.pi / room_split
 
     # Create grid coordinates
-    x_coords, y_coords = np.meshgrid(np.arange(map_size_x), np.arange(map_size_y), indexing='ij')
+    x_coords, y_coords = np.meshgrid(
+        np.arange(map_size_x), np.arange(map_size_y), indexing="ij"
+    )
 
     # Calculate relative positions to the robot
     dx = x_coords - robot_x
@@ -64,16 +66,22 @@ def generate_feature_vector(
         # Metrics for the current section
         total_area = np.sum(combined_mask)
         unexplored_area = np.sum(combined_mask & (frontier_map < frontier_threshold))
-        obstacle_distances = distances[combined_mask & (obstacle_map > obstacle_threshold)]
+        obstacle_distances = distances[
+            combined_mask & (obstacle_map > obstacle_threshold)
+        ]
 
         # Nearest obstacle distance
-        nearest_obstacle_distance = obstacle_distances.min() if obstacle_distances.size > 0 else 0
+        nearest_obstacle_distance = (
+            obstacle_distances.min() if obstacle_distances.size > 0 else 0
+        )
 
         # Calculate the unexplored ratio
         unexplored_ratio = unexplored_area / total_area if total_area > 0 else 0
 
         # Append the features for this section
-        feature_vector.extend([total_area, nearest_obstacle_distance, unexplored_area, unexplored_ratio])
+        feature_vector.extend(
+            [total_area, nearest_obstacle_distance, unexplored_area, unexplored_ratio]
+        )
 
     # Convert feature vector to numpy array
     return np.array(feature_vector)

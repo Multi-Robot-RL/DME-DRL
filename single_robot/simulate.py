@@ -117,13 +117,13 @@ def update_maps(
                 break
 
             # Check the ground truth obstacle map
-            if ground_truth_obstacle_map[y, x] == 1:  # Obstacle detected
-                updated_frontier_map[y, x] = 1  # Mark as explored
-                updated_robot_obstacle_map[y, x] = 1  # Update robot's obstacle map
+            if ground_truth_obstacle_map[x, y] == 1:  # Obstacle detected
+                updated_frontier_map[x, y] = 1  # Mark as explored
+                updated_robot_obstacle_map[x, y] = 1  # Update robot's obstacle map
                 break  # Stop raycasting further along this ray
 
             # Update the frontier map for free space
-            updated_frontier_map[y, x] = 1  # Mark as explored
-            updated_robot_obstacle_map[y, x] = 0  # Confirm it's free space
+            updated_frontier_map[x, y] = 1  # Mark as explored
+            updated_robot_obstacle_map[x, y] = 0  # Confirm it's free space
 
     return updated_frontier_map, updated_robot_obstacle_map
