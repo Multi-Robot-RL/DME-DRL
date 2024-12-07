@@ -46,7 +46,7 @@ def simulate_robot_step(
     next_y = max(0, min(next_y, height - 1))
 
     # Check if the next location collides with an obstacle
-    next_i, next_j = int(next_y), int(next_x)  # Convert to map indices
+    next_i, next_j = int(next_x), int(next_y)  # Convert to map indices
     if binary_map[next_i, next_j] == 1:  # Obstacle detected
         return (
             location,
@@ -113,7 +113,7 @@ def update_maps(
             x, y = int(x_robot + dx), int(y_robot + dy)
 
             # Ensure the point is within the map boundaries
-            if x < 0 or x >= width or y < 0 or y >= height:
+            if x < 0 or x >= height or y < 0 or y >= width:
                 break
 
             # Check the ground truth obstacle map

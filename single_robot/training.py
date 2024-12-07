@@ -1,3 +1,4 @@
+from os import makedirs
 import numpy as np
 import torch
 import torch.optim as optim
@@ -23,6 +24,7 @@ from dataset import load_processed_dataset, data_path
 
 from reward import evaluate_model_performance
 from animation import animate_robot_progress
+from datetime import datetime
 
 
 # Initialize model and optimizer
@@ -33,6 +35,28 @@ model = ActorCriticDQN(
     input_dim, hidden_dim, output_dim, MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY
 )
 optimizer = optim.Adam(model.parameters(), lr=LR)
+
+def generate_random_free_location(ground_truth_obstacle_map):
+    """
+    Generate a random location within the map that is not an obstacle.
+
+    Args:
+        ground_truth_obstacle_map (np.ndarray): Ground truth obstacle map (1 = obstacle, 0 = free space).
+
+    Returns:
+        tuple: (x, y) coordinates of the random free location.
+    """
+    # Get indices of all free cells (value 0)
+    free_space_indices = np.argwhere(ground_truth_obstacle_map == 0)
+
+    if free_space_indices.size == 0:
+        raise ValueError("No free space available in the obstacle map.")
+
+    # Randomly select one of the free cells
+    random_index = np.random.choice(len(free_space_indices))
+    random_free_location = tuple(free_space_indices[random_index])
+
+    return random_free_location
 
 
 # Environment setup
@@ -60,6 +84,7 @@ def create_environment(houseexpo_dataset, room_id):
 
     return ground_truth_obstacle_map, frontier_map, robot_obstacle_map
 
+train_id = "TRAIN"+str(datetime.now()).replace(" ", ".")
 
 dataset = load_processed_dataset(0, TRAIN_DATASET_SIZE)
 # Training loop
@@ -69,7 +94,7 @@ for episode in range(MAX_EPISODES):
         dataset, episode % TRAIN_DATASET_SIZE
     )
     map_size = ground_truth_obstacle_map.shape
-    current_location = (np.random.randint(map_size[1]), np.random.randint(map_size[0]))
+    current_location = generate_random_free_location(ground_truth_obstacle_map)
     current_direction = np.random.uniform(0, 2 * np.pi)
     total_reward = 0
     locations = []
@@ -166,6 +191,8 @@ for episode in range(MAX_EPISODES):
     print(
         f"Episode {episode + 1}/{MAX_EPISODES}, Total Reward: {total_reward:.2f}, Free Space Discovered: {performance:.2f}%"
     )
+    if not (data_path/train_id).exists():
+        makedirs(data_path/train_id)
     animate_robot_progress(
         frontier_maps,
         robot_obstacle_maps,
@@ -174,8 +201,7 @@ for episode in range(MAX_EPISODES):
         directions,
         max_detection_dist=MAX_DETECTION_DIST,
         max_detection_angle=MAX_DETECTION_ANGLE,
-        save_path=data_path / f"episode{episode}.gif"
+        save_path=data_path /train_id/ f"episode{episode}.gif"
     )
-    break
 
 print("Training Complete.")
