@@ -33,7 +33,7 @@ def animate_robot_progress(
     # Initialize the maps and robot position plots
     images = []
     for ax, title in zip(axes, titles):
-        img = ax.imshow(np.zeros_like(frontier_maps[0]), cmap="gray", origin="lower")
+        img = ax.imshow(np.zeros_like(frontier_maps[0].cpu()), cmap="gray", origin="lower")
         images.append(img)
         ax.set_title(title)
         ax.set_xlabel("X")
