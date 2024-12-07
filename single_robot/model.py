@@ -79,7 +79,7 @@ class ActorCriticDQN(nn.Module):
 
 
 # Parameters for the model
-input_dim = 4 * ROOM_SPLIT  # 4 features per section, multiplied by ROOM_SPLIT
+input_dim = 4 * ROOM_SPLIT + 5  # 4 features per section, multiplied by ROOM_SPLIT and the robot location, room size and direction
 # Create the Actor-Critic model
 model = ActorCriticDQN(
     input_dim=input_dim,

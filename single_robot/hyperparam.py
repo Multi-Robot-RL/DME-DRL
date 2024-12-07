@@ -1,6 +1,6 @@
 import numpy as np
 
-ROOM_SPLIT = 200
+ROOM_SPLIT = 20
 HIDDEN_DIM = 1024
 OUTPUT_DIM = 2
 

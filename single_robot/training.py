@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-from model import ActorCriticDQN
+from model import ActorCriticDQN, model
 from hyperparam import (
     MAX_LINEAR_VELOCITY,
     MAX_ANGULAR_VELOCITY,
@@ -28,12 +28,6 @@ from datetime import datetime
 
 
 # Initialize model and optimizer
-input_dim = 4 * 8  # Assume ROOM_SPLIT = 8 and 4 features per section
-hidden_dim = 128
-output_dim = 2  # Angular and linear velocity
-model = ActorCriticDQN(
-    input_dim, hidden_dim, output_dim, MAX_LINEAR_VELOCITY, MAX_ANGULAR_VELOCITY
-)
 optimizer = optim.Adam(model.parameters(), lr=LR)
 
 
@@ -112,7 +106,7 @@ for episode in range(MAX_EPISODES):
         robot_obstacle_maps.append(robot_obstacle_map)
         # Generate features
         feature_vector = generate_feature_vector(
-            robot_obstacle_map, frontier_map, current_location, 8, 0.5, 0.5
+            robot_obstacle_map, frontier_map, current_location, current_direction,  0.5, 0.5
         )
         feature_tensor = torch.tensor(feature_vector, dtype=torch.float32).unsqueeze(0)
 

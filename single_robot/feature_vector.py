@@ -1,11 +1,13 @@
 import numpy as np
 
+from hyperparam import ROOM_SPLIT
+
 
 def generate_feature_vector(
     frontier_map,
     obstacle_map,
     robot_position,
-    room_split,
+    robot_direction,
     frontier_threshold,
     obstacle_threshold,
 ):
@@ -30,7 +32,7 @@ def generate_feature_vector(
     robot_x, robot_y = robot_position
 
     # Angular increment for each section
-    angle_increment = 2 * np.pi / room_split
+    angle_increment = 2 * np.pi / ROOM_SPLIT
 
     # Create grid coordinates
     x_coords, y_coords = np.meshgrid(
@@ -53,7 +55,7 @@ def generate_feature_vector(
     feature_vector = []
 
     # Iterate through each angular section
-    for section in range(room_split):
+    for section in range(ROOM_SPLIT):
         start_angle = section * angle_increment
         end_angle = (section + 1) * angle_increment
 
@@ -84,4 +86,4 @@ def generate_feature_vector(
         )
 
     # Convert feature vector to numpy array
-    return np.array(feature_vector)
+    return np.concatenate((np.array(feature_vector), np.array(robot_position), frontier_map.shape, np.array([robot_direction])))
