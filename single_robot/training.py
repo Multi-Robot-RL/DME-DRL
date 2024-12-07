@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-from model import ActorCriticDQN, model
+from model import ActorCriticDQN, model, save_onnx
 from hyperparam import (
     MAX_LINEAR_VELOCITY,
     MAX_ANGULAR_VELOCITY,
@@ -51,7 +51,8 @@ def generate_random_free_location(ground_truth_obstacle_map):
     random_index = np.random.choice(len(free_space_indices))
     random_free_location = tuple(free_space_indices[random_index])
 
-    return random_free_location
+    # return random_free_location
+    return (200,200)
 
 
 # Environment setup
@@ -190,17 +191,19 @@ for episode in range(MAX_EPISODES):
     print(
         f"Episode {episode + 1}/{MAX_EPISODES}, Total Reward: {total_reward:.2f}, Free Space Discovered: {old_performance:.2f}%"
     )
-    if not (data_path / train_id).exists():
-        makedirs(data_path / train_id)
-    animate_robot_progress(
-        frontier_maps,
-        robot_obstacle_maps,
-        ground_truth_obstacle_map,
-        locations,
-        directions,
-        max_detection_dist=MAX_DETECTION_DIST,
-        max_detection_angle=MAX_DETECTION_ANGLE,
-        save_path=data_path / train_id / f"episode{episode}.gif",
-    )
+    if episode % 20 == 0:
+        if not (data_path / train_id).exists():
+            makedirs(data_path / train_id)
+        animate_robot_progress(
+            frontier_maps,
+            robot_obstacle_maps,
+            ground_truth_obstacle_map,
+            locations,
+            directions,
+            max_detection_dist=MAX_DETECTION_DIST,
+            max_detection_angle=MAX_DETECTION_ANGLE,
+            save_path=data_path / train_id / f"episode{episode}.gif",
+        )
 
 print("Training Complete.")
+save_onnx(model, data_path / train_id / "model.onnx")

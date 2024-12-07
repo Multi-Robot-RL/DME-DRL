@@ -91,3 +91,18 @@ model = ActorCriticDQN(
 
 # Print the model architecture
 print(model)
+
+def save_onnx(model, file_path):
+    # Set the model to evaluation mode
+    model.eval()
+    input_shape = (1, input_dim)
+
+    # Create a dummy input tensor with the specified shape
+    dummy_input = torch.randn(*input_shape)
+
+    # Export the model to ONNX
+    torch.onnx.export(
+        model,                      # Model to export
+        dummy_input,                # Dummy input to trace the model
+        file_path
+        )
