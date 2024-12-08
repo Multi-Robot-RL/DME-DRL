@@ -65,8 +65,14 @@ class ActorCriticDQN(nn.Module):
         )  # Outputs raw angular and linear velocities
 
         # Restrict velocities
-        linear_velocity = torch.tanh(actor_output[:, 0] / self.max_linear_velocity) * self.max_linear_velocity
-        angular_velocity = torch.tanh(actor_output[:, 1] / self.max_angular_velocity) * self.max_angular_velocity
+        linear_velocity = (
+            torch.tanh(actor_output[:, 0] / self.max_linear_velocity)
+            * self.max_linear_velocity
+        )
+        angular_velocity = (
+            torch.tanh(actor_output[:, 1] / self.max_angular_velocity)
+            * self.max_angular_velocity
+        )
         restricted_actor_output = torch.stack(
             [linear_velocity, angular_velocity], dim=1
         )
@@ -79,7 +85,9 @@ class ActorCriticDQN(nn.Module):
 
 
 # Parameters for the model
-input_dim = 4 * ROOM_SPLIT + 5  # 4 features per section, multiplied by ROOM_SPLIT and the robot location, room size and direction
+input_dim = (
+    4 * ROOM_SPLIT + 5
+)  # 4 features per section, multiplied by ROOM_SPLIT and the robot location, room size and direction
 # Create the Actor-Critic model
 model = ActorCriticDQN(
     input_dim=input_dim,
@@ -92,6 +100,7 @@ model = ActorCriticDQN(
 # Print the model architecture
 print(model)
 
+
 def save_onnx(model, file_path):
     # Set the model to evaluation mode
     model.eval()
@@ -102,7 +111,7 @@ def save_onnx(model, file_path):
 
     # Export the model to ONNX
     torch.onnx.export(
-        model,                      # Model to export
-        dummy_input,                # Dummy input to trace the model
-        file_path
-        )
+        model,  # Model to export
+        dummy_input,  # Dummy input to trace the model
+        file_path,
+    )

@@ -25,70 +25,21 @@ from dataset import load_processed_dataset, data_path
 from reward import evaluate_model_performance
 from animation import animate_robot_progress
 from datetime import datetime
+from utils import generate_random_free_location, create_environment
 
 
 # Initialize model and optimizer
 optimizer = optim.Adam(model.parameters(), lr=LR)
 
 
-def generate_random_free_location(ground_truth_obstacle_map):
-    """
-    Generate a random location within the map that is not an obstacle.
-
-    Args:
-        ground_truth_obstacle_map (np.ndarray): Ground truth obstacle map (1 = obstacle, 0 = free space).
-
-    Returns:
-        tuple: (x, y) coordinates of the random free location.
-    """
-    # Get indices of all free cells (value 0)
-    free_space_indices = np.argwhere(ground_truth_obstacle_map == 0)
-
-    if free_space_indices.size == 0:
-        raise ValueError("No free space available in the obstacle map.")
-
-    # Randomly select one of the free cells
-    random_index = np.random.choice(len(free_space_indices))
-    random_free_location = tuple(free_space_indices[random_index])
-
-    # return random_free_location
-    return (200,200)
-
-
-# Environment setup
-def create_environment(houseexpo_dataset, room_id):
-    """
-    Create an environment for a specific room using the HouseExpo dataset.
-
-    Args:
-        houseexpo_dataset (Dataset): The loaded HouseExpo dataset.
-        room_id (int): The ID of the room to initialize.
-
-    Returns:
-        tuple: (ground_truth_obstacle_map, frontier_map, robot_obstacle_map).
-    """
-    # Load the specific room from the dataset
-    ground_truth_obstacle_map = np.array(houseexpo_dataset[room_id]["binary_mask"])
-    print(f"Map size of Room {room_id}: {ground_truth_obstacle_map.shape}")
-
-    # Initialize the frontier map and robot obstacle map
-    map_size = ground_truth_obstacle_map.shape
-    frontier_map = np.zeros(map_size)  # All cells unexplored initially
-    robot_obstacle_map = np.zeros(
-        map_size
-    )  # Robot has no knowledge of obstacles initially
-
-    return ground_truth_obstacle_map, frontier_map, robot_obstacle_map
-
-
 train_id = "TRAIN" + str(datetime.now()).replace(" ", ".")
 
 dataset = load_processed_dataset(0, TRAIN_DATASET_SIZE)
 # Training loop
-for episode in range(MAX_EPISODES):
-    # Initialize environment and robot state
+for episode in range(max_episodes):
+    # initialize environment and robot state
     ground_truth_obstacle_map, frontier_map, robot_obstacle_map = create_environment(
-        dataset, episode % TRAIN_DATASET_SIZE
+        dataset, episode % train_dataset_size
     )
     map_size = ground_truth_obstacle_map.shape
     current_location = generate_random_free_location(ground_truth_obstacle_map)
@@ -108,7 +59,12 @@ for episode in range(MAX_EPISODES):
         robot_obstacle_maps.append(robot_obstacle_map)
         # Generate features
         feature_vector = generate_feature_vector(
-            robot_obstacle_map, frontier_map, current_location, current_direction,  0.5, 0.5
+            robot_obstacle_map,
+            frontier_map,
+            current_location,
+            current_direction,
+            0.5,
+            0.5,
         )
         feature_tensor = torch.tensor(feature_vector, dtype=torch.float32).unsqueeze(0)
 
@@ -152,8 +108,8 @@ for episode in range(MAX_EPISODES):
         if collision:
             reward = COLLISION_PENALTY
         else:
-            reward = (
-                EXPLORATION_REWARD * (new_performance - old_performance)
+            reward = EXPLORATION_REWARD * (
+                new_performance - old_performance
             )  # Reward for valid movement and exploration
         print(reward)
         old_performance = new_performance
@@ -162,7 +118,7 @@ for episode in range(MAX_EPISODES):
 
         # Calculate TD target and loss
         next_feature_vector = generate_feature_vector(
-            robot_obstacle_map, frontier_map, next_location,next_direction, 0.5, 0.5
+            robot_obstacle_map, frontier_map, next_location, next_direction, 0.5, 0.5
         )
         next_feature_tensor = torch.tensor(
             next_feature_vector, dtype=torch.float32

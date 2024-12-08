@@ -2,6 +2,8 @@ from os import makedirs
 from datasets import load_dataset, load_from_disk
 import numpy as np
 from pathlib import Path
+from skimage.transform import resize
+
 
 
 # Load the HouseExpo dataset
@@ -12,6 +14,7 @@ def process_image(image):
     image_array = np.array(image)
 
     # Create binary mask: 0 for free space (white), 1 for obstacles (black)
+    image_array = resize(image_array, (1024, 1024))
     binary_mask = np.where(image_array < 128, 1, 0)  # Threshold at 128
 
     # Calculate features

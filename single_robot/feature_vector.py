@@ -4,6 +4,7 @@ from hyperparam import ROOM_SPLIT
 
 import numpy as np
 
+
 def generate_feature_vector(
     frontier_map,
     obstacle_map,
@@ -75,10 +76,14 @@ def generate_feature_vector(
         total_area[section] = np.sum(combined_mask)
 
         # Unexplored area
-        unexplored_area[section] = np.sum(combined_mask & (frontier_map < frontier_threshold))
+        unexplored_area[section] = np.sum(
+            combined_mask & (frontier_map < frontier_threshold)
+        )
 
         # Nearest obstacle distance
-        obstacle_distances = distances[combined_mask & (obstacle_map > obstacle_threshold)]
+        obstacle_distances = distances[
+            combined_mask & (obstacle_map > obstacle_threshold)
+        ]
         if obstacle_distances.size > 0:
             nearest_obstacle_distance[section] = obstacle_distances.min()
 
@@ -87,7 +92,10 @@ def generate_feature_vector(
 
     # Calculate unexplored ratio
     unexplored_ratio = np.divide(
-        unexplored_area, total_area, out=np.zeros_like(unexplored_area), where=total_area > 0
+        unexplored_area,
+        total_area,
+        out=np.zeros_like(unexplored_area),
+        where=total_area > 0,
     )
 
     # Flatten the feature vector
@@ -104,4 +112,3 @@ def generate_feature_vector(
     )
 
     return feature_vector
-
