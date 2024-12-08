@@ -122,6 +122,7 @@ for episode in range(MAX_EPISODES):
 
         # Simulate next step
         action = (linear_velocity, angular_velocity)
+        print(f"Linear {linear_velocity}, Angular Velocity {angular_velocity}")
         next_location, next_direction, collision = simulate_robot_step(
             current_location,
             current_direction,
@@ -152,7 +153,7 @@ for episode in range(MAX_EPISODES):
             reward = COLLISION_PENALTY
         else:
             reward = (
-                EXPLORATION_REWARD * np.tanh(new_performance - old_performance)
+                EXPLORATION_REWARD * (new_performance - old_performance)
             )  # Reward for valid movement and exploration
         print(reward)
         old_performance = new_performance
@@ -178,6 +179,7 @@ for episode in range(MAX_EPISODES):
         # Total loss
         loss = actor_loss + critic_loss
 
+        print(f"Loss={loss} ActorLoss={actor_loss} critic Loss = {critic_loss}")
         # Backpropagation
         optimizer.zero_grad()
         loss.backward()

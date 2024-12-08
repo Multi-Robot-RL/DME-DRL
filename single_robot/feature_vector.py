@@ -94,9 +94,9 @@ def generate_feature_vector(
     feature_vector = np.concatenate(
         [
             total_area,
-            1 / nearest_obstacle_distance,
+            nearest_obstacle_distance,
             unexplored_area,
-            1 / unexplored_ratio,
+            unexplored_ratio,
             np.array(robot_position),
             frontier_map.shape,
             np.array([robot_direction]),

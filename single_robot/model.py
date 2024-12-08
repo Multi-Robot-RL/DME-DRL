@@ -34,15 +34,15 @@ class ActorCriticDQN(nn.Module):
         self.max_angular_velocity = max_angular_velocity
 
         # Shared layers for feature extraction
-        self.shared_fc1 = nn.Linear(input_dim, hidden_dim)
-        self.shared_fc2 = nn.Linear(hidden_dim, hidden_dim)
+        # self.shared_fc1 = nn.Linear(input_dim, hidden_dim)
+        # self.shared_fc2 = nn.Linear(hidden_dim, hidden_dim)
 
         # Actor network
-        self.actor_fc1 = nn.Linear(hidden_dim, hidden_dim)
+        self.actor_fc1 = nn.Linear(input_dim, hidden_dim)
         self.actor_output = nn.Linear(hidden_dim, output_dim)
 
         # Critic network
-        self.critic_fc1 = nn.Linear(hidden_dim, hidden_dim)
+        self.critic_fc1 = nn.Linear(input_dim, hidden_dim)
         self.critic_output = nn.Linear(hidden_dim, 1)
 
     def forward(self, x):
@@ -55,8 +55,8 @@ class ActorCriticDQN(nn.Module):
             torch.Tensor: Critic output (state value).
         """
         # Shared feature extraction
-        x = F.relu(self.shared_fc1(x))
-        x = F.relu(self.shared_fc2(x))
+        # x = F.relu(self.shared_fc1(x))
+        # x = F.relu(self.shared_fc2(x))
 
         # Actor branch
         actor_hidden = F.relu(self.actor_fc1(x))
@@ -65,8 +65,8 @@ class ActorCriticDQN(nn.Module):
         )  # Outputs raw angular and linear velocities
 
         # Restrict velocities
-        linear_velocity = torch.tanh(actor_output[:, 0]) * self.max_linear_velocity
-        angular_velocity = torch.tanh(actor_output[:, 1]) * self.max_angular_velocity
+        linear_velocity = torch.tanh(actor_output[:, 0] / self.max_linear_velocity) * self.max_linear_velocity
+        angular_velocity = torch.tanh(actor_output[:, 1] / self.max_angular_velocity) * self.max_angular_velocity
         restricted_actor_output = torch.stack(
             [linear_velocity, angular_velocity], dim=1
         )

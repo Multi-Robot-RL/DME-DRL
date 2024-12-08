@@ -25,13 +25,15 @@ def simulate_robot_step(
     linear_velocity, angular_velocity = action
     width, height = map_size
 
-    # Add Gaussian noise to velocities
-    noisy_linear_velocity = linear_velocity + np.random.normal(
-        0, randomness_std * abs(linear_velocity)
-    )
-    noisy_angular_velocity = angular_velocity + np.random.normal(
-        0, randomness_std * abs(angular_velocity)
-    )
+    # # Add Gaussian noise to velocities
+    # noisy_linear_velocity = linear_velocity + np.random.normal(
+    #     0, randomness_std * abs(linear_velocity)
+    # )
+    # noisy_angular_velocity = angular_velocity + np.random.normal(
+    #     0, randomness_std * abs(angular_velocity)
+    # )
+    noisy_angular_velocity = angular_velocity
+    noisy_linear_velocity = linear_velocity
 
     # Update direction (radians)
     next_direction = direction + noisy_angular_velocity * elapsed_time
